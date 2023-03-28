@@ -5,18 +5,21 @@ from statsmodels.tsa.arima.model import ARIMA
 import matplotlib.pyplot as plt
 
 # Read in the CSV file containing magnetometer data
-data = pd.read_csv('newtest//oneSet.csv', header=None, names=['x', 'y', 'z'])
-timestamps = pd.read_csv('newtest//oneSetTimestamps.csv')
+data = pd.read_csv('test.txt', header=None, names=['x', 'y', 'z', 't'])
+#timestamps = pd.read_csv('newtest//oneSetTimestamps.csv')
 
 # Combine x, y, z data into a single time series
 x_dta = data['x']
 y_dta = data['y']
 z_dta = data['z']
+timestamps = data['t']
 
 
 # Plot the time series
 fig, ax = plt.subplots(figsize=(10, 5))
-ax.plot(data)
+ax.plot(data['t'], data['x'])
+ax.plot(data['t'], data['y'])
+ax.plot(data['t'], data['z'])
 ax.set_xlabel('time')
 ax.set_ylabel('Magnetometer Reading')
 ax.set_title('Magnetometer Time Series')

@@ -12,7 +12,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 const int sampleRate = 100; //100Hz is BNO055 sample rate
 
 
-const int testTime = 60;
+const int testTime = 30;
 
 const int numSamples = sampleRate*testTime;
 const int bufferLen = numSamples;
@@ -23,7 +23,7 @@ double imuTimestamps[bufferLen];
 
 void printData(){
   Serial.println();
-  Serial.println("Sending magBuffer [X,Y,Z]:");
+  Serial.println("Sending magData [X,Y,Z, time]:");
   for(int i = 1; i < bufferLen; i++){
     imu::Vector<3> mag = magBuffer[i];
     Serial.print(mag.x());
@@ -31,17 +31,13 @@ void printData(){
     Serial.print(mag.y());
     Serial.print(", ");
     Serial.print(mag.z());
+    Serial.print(", ");
+    Serial.print(imuTimestamps[i], 4);
     Serial.println();
 
   }
 
-  Serial.println();
-  Serial.println("Sending imuTimestamps:");
-  for(int i = 0; i < bufferLen; i++){
-    Serial.print(imuTimestamps[i], 4);
-    Serial.print(", ");
-  }
-  Serial.println();
+  
   
 }
 
@@ -62,10 +58,10 @@ void setup(void)
   displaySensorDetails(bno);
 
   /* Optional: Display current status */
-  displaySensorStatus(bno);
+  //displaySensorStatus(bno);
 
   /* Optional: Display current calibration status */
-  displayCalStatus(bno);
+  //displayCalStatus(bno);
 
   bno.setExtCrystalUse(true);
 
@@ -74,7 +70,14 @@ void setup(void)
 }
 
 void loop(void)
-{
+{ 
+  displaySensorStatus(bno);
+  displayCalStatus(bno);
+  Serial.println("Is calibrated?(y/n):");
+  while (Serial.available() == 0) {}     //wait for data available
+  String isCal = Serial.readString();  //read until timeout
+  isCal.trim();                        // remove any \r \n whitespace at the end of the String
+  if (isCal == "y") {
     unsigned long start = millis();
     unsigned long last_sample = start;
     unsigned long start_time = last_sample;
@@ -104,6 +107,7 @@ void loop(void)
     Serial.println(" ms");
     
     printData();
+    }
   
 }
 
