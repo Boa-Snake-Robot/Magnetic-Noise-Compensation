@@ -5,7 +5,7 @@ from statsmodels.tsa.arima.model import ARIMA
 import matplotlib.pyplot as plt
 
 # Read in the CSV file containing magnetometer data
-data = pd.read_csv('test.txt', header=None, names=['x', 'y', 'z', 't'])
+data = pd.read_csv('arduinodataTest.txt', header=None, names=['x', 'y', 'z', 't'])
 #timestamps = pd.read_csv('newtest//oneSetTimestamps.csv')
 
 # Combine x, y, z data into a single time series

@@ -1,6 +1,3 @@
-'''TODO: SØRG FOR AT LOGGING ER RETT, SKRIV KODE FOR Å ENDRE HASTIGHET OG FOR Å GJØRE SWITCHINGEN MELLOM POSISJONER
-NÅR DU SKAL ENDRE HASTIGHET, SØRG FOR AT KOMVERTERINGEN BLIR KORREKT :) '''
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -40,7 +37,6 @@ import os
 import utilities as u
 import datetime
 import numpy as np
-import string
 
 if os.name == 'nt':
     import msvcrt
@@ -73,6 +69,7 @@ if MY_DXL == 'X_SERIES':
     ADDR_LED                    = 65
 
     ADDR_GOAL_VEL               = 104
+    ADDR_PROFILE_ACCELERATION   = 108
     ADDR_GOAL_POSITION          = 116
 
     ADDR_PRESENT_CURRENT        = 126
@@ -103,16 +100,18 @@ TORQUE_DISABLE              = 0     # Value for disabling the torque
 DXL_MOVING_STATUS_THRESHOLD = 20    # Dynamixel moving status threshold
 POS_MODE                    = 3
 VEL_MODE                    = 1
+PROFILE_ACC                 = 1
 
-pos_index = 0
 vel_index = 0
-dxl_goal_position = np.linspace(DXL_MINIMUM_POSITION_VALUE, DXL_MAXIMUM_POSITION_VALUE, 6, dtype=int)         # Goal position
-dxl_goal_velocity = np.linspace(30, DXL_VELOCITY_LIMIT, 20, dtype=int)
+dxl_goal_velocity = np.linspace(40, DXL_VELOCITY_LIMIT - 100, 20, dtype=int)
 
+ 
+last_mod = 1        #just one
+present_mod = 4096  #180 degrees
 
 # Initialize PortHandler instance
 # Set the port path
-# Get methods and members of PortHandlerLinux or PortHandlerWindows
+# Get methods and members of PortHandlerLinux or PortHandlerWindo ws
 portHandler = PortHandler(DEVICENAME)
 
 # Initialize PacketHandler instance
@@ -139,52 +138,46 @@ else:
     getch()
     quit()
 
-# Enable Dynamixel Torque
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
+# Set correct mode, profile acceleration and enable torque
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, VEL_MODE)
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
     print("%s" % packetHandler.getRxPacketError(dxl_error))
 else:
-    print("Dynamixel has been successfully connected")
-    packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_LED, LED_ON)
+    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_PROFILE_ACCELERATION, PROFILE_ACC)
+    if dxl_comm_result != COMM_SUCCESS:
+        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("%s" % packetHandler.getRxPacketError(dxl_error))
+    else:
+        print('successfully set profile acceleration\n')
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
+    if dxl_comm_result != COMM_SUCCESS:
+        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("%s" % packetHandler.getRxPacketError(dxl_error))
+    else:
+        print("Dynamixel has been successfully connected, and mode was set to velocity mode")
+        packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_LED, LED_ON)
 
 while 1:
-    print("Enter what you want to do 1) pos, 2) vel (or press ESC to quit!)")
-    choice = input()
-    print('You are running ' + choice + ')\n')
+    print("Press any key to continue(or press ESC to quit!)")
 
     if getch() == chr(0x1b):
         break
+    
+    num_rounds = 0
 
-    # Write goal position
-    if choice == '1':
-        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
-        if dxl_comm_result != COMM_SUCCESS:
-            print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("%s" % packetHandler.getRxPacketError(dxl_error))
-        else:
-            dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, POS_MODE)
-            if dxl_comm_result != COMM_SUCCESS:
-                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-            elif dxl_error != 0:
-                print("%s" % packetHandler.getRxPacketError(dxl_error))
-            else:
-                dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
-                print(dxl_goal_position[pos_index])
-                dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, dxl_goal_position[pos_index])
-    elif choice == '2':
-        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
-        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, VEL_MODE)
-        if dxl_comm_result != COMM_SUCCESS:
-            print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("%s" % packetHandler.getRxPacketError(dxl_error))
-        else:
-            dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
-            dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_VEL, dxl_goal_velocity[vel_index])
-
+    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_VEL, dxl_goal_velocity[vel_index])
+    if dxl_comm_result != COMM_SUCCESS:
+        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("%s" % packetHandler.getRxPacketError(dxl_error))
+    else:
+        print('successfully set speed to ' + str(dxl_goal_velocity[vel_index]))
+        num_rounds = 0
+                
 
     while 1:
         # Read present position
@@ -204,22 +197,38 @@ while 1:
         data = [dxl_present_position, dxl_present_velocity, dxl_present_current]
 
         u.writeDataArrayToFile(FILENAME, data, withTimestamps = True)
-        print("[ID:%03d] GoalPos:%03d  PresPos:%03d" % (DXL_ID, dxl_goal_position[pos_index], dxl_present_position))
+        print("[ID:%03d] GoalVelocity:%03d  PresVelocity:%03d" % (DXL_ID, dxl_goal_velocity[vel_index], dxl_present_velocity))
+
         
+        present_mod = dxl_present_position % 4096
+        if (present_mod - last_mod) <= 0:
+            #whenever the dynamixel has performed a full rotation
+            num_rounds = num_rounds + 1
+        if num_rounds > 1:
+            # Change goal velocity
+            vel_index = vel_index + 1
+            if vel_index >= len(dxl_goal_velocity):
+                dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_VEL, 0)
+                vel_index = 0
+            if dxl_comm_result != COMM_SUCCESS:
+                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+            elif dxl_error != 0:
+                print("%s" % packetHandler.getRxPacketError(dxl_error))
+            else:
+                print('successfully set speed to ' + str(dxl_goal_velocity[vel_index]))
+                break
+            dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_VEL, dxl_goal_velocity[vel_index])
+            if dxl_comm_result != COMM_SUCCESS:
+                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+            elif dxl_error != 0:
+                print("%s" % packetHandler.getRxPacketError(dxl_error))
+            else:
+                print('successfully set speed to ' + str(dxl_goal_velocity[vel_index]))
+                num_rounds = 0
+        last_mod = present_mod
 
-        if not abs(dxl_goal_position[pos_index] - dxl_present_position) > DXL_MOVING_STATUS_THRESHOLD:
-            break
 
-    # Change goal position/ velocity
-    if choice == '1':
-        pos_index = pos_index + 1
-        if pos_index >= len(dxl_goal_position):
-            pos_index = 0
-
-    if choice == '2':
-        vel_index = vel_index + 1
-        if vel_index >= len(dxl_goal_position):
-            vel_index = 0
+   
 
 
 

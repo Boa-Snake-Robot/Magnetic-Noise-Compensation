@@ -20,10 +20,11 @@ const int bufferLen = numSamples;
 /*Assign buffers*/
 imu::Vector<3> magBuffer[bufferLen];
 double imuTimestamps[bufferLen];
+unsigned long start = millis();
 
 void printData(){
   Serial.println();
-  Serial.println("Sending magData [X,Y,Z, time]:");
+  //Serial.println("Sending magData [X,Y,Z, time]:");
   for(int i = 1; i < bufferLen; i++){
     imu::Vector<3> mag = magBuffer[i];
     Serial.print(mag.x());
@@ -64,50 +65,46 @@ void setup(void)
   //displayCalStatus(bno);
 
   bno.setExtCrystalUse(true);
+  String isCal = "n";
+  while(isCal != "y"){
+    displaySensorStatus(bno);
+    displayCalStatus(bno);
+    Serial.println("Is calibrated?(y/n):");
+    while (Serial.available() == 0) {}     //wait for data available
+    isCal = Serial.readString();  //read until timeout
+    isCal.trim();                        // remove any \r \n whitespace at the end of the String
+  }
 
   Serial.println("Setup complete");
+  start = millis();
 
 }
 
 void loop(void)
-{ 
-  displaySensorStatus(bno);
-  displayCalStatus(bno);
-  Serial.println("Is calibrated?(y/n):");
-  while (Serial.available() == 0) {}     //wait for data available
-  String isCal = Serial.readString();  //read until timeout
-  isCal.trim();                        // remove any \r \n whitespace at the end of the String
-  if (isCal == "y") {
-    unsigned long start = millis();
-    unsigned long last_sample = start;
-    unsigned long start_time = last_sample;
-    unsigned long last_round = start + 3000; 
-    Serial.print("Bufferlen");
-    Serial.println("Test start");
+{     
+  unsigned long start_loop = millis();
+  unsigned long last_sample = start_loop;
+  unsigned long start_time = last_sample;
+  unsigned long last_round = start_loop + 3000; 
+  //Serial.print("Bufferlen");
+  //Serial.println("Test start");
+  int i = 0;
+  while (i < bufferLen){
     
-    int i = 0;
-    while (i < bufferLen){
-      
-      /* Sample data */
-      unsigned long newTime = millis();
-      unsigned long diff = newTime - last_sample;
-  
-      if(diff > (1000/sampleRate)){
-        magBuffer[i] = bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
-        last_sample = millis();
-        imuTimestamps[i] = (double)(last_sample - start)/1000;
-        i++;
-        }        
-      }
-    
+    /* Sample data */
+    unsigned long newTime = millis();
+    unsigned long diff = newTime - last_sample;
 
-    /*PRINT DATA TO SERIAL MONITOR*/
-    Serial.print("Test took ");
-    Serial.print(millis() - start_time);
-    Serial.println(" ms");
-    
-    printData();
+    if(diff > (1000/sampleRate)){
+      magBuffer[i] = bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
+      last_sample = millis();
+      imuTimestamps[i] = (double)(last_sample - start)/1000;
+      i++;
+      }        
     }
+  
+  printData();
+  
   
 }
 
