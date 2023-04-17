@@ -9,7 +9,7 @@
 /*Implement absolute value position and set zero angle to rom cmd */
 
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
-const int sampleRate = 100; //100Hz is BNO055 sample rate
+const int sampleRate = 20; //20Hz is BNO055 magnetometer sample rate
 
 
 const int testTime = 30;
