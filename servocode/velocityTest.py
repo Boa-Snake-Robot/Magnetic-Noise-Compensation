@@ -103,7 +103,7 @@ VEL_MODE                    = 1
 PROFILE_ACC                 = 1
 
 vel_index = 0
-dxl_goal_velocity = np.linspace(40, DXL_VELOCITY_LIMIT - 100, 20, dtype=int)
+dxl_goal_velocity = np.linspace(40 , DXL_VELOCITY_LIMIT - 100, 20, dtype=int)
 
  
 last_mod = 1        #just one
