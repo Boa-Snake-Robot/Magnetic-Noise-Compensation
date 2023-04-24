@@ -38,7 +38,11 @@ import os
 import utilities as u
 import datetime
 import numpy as np
-import string
+import time
+import datetime
+import csv
+import board
+import adafruit_bno055
 
 
 if os.name == 'nt':
@@ -58,6 +62,11 @@ else:
         return ch
 
 from dynamixel_sdk import * # Uses Dynamixel SDK library
+
+'''-----------------------------------------------------------'''
+SAMPLINGRATE = 20 #Hz
+
+'''Setup servo communication'''
 
 #********* DYNAMIXEL Model definition *********
 MY_DXL = 'X_SERIES'       
@@ -134,6 +143,15 @@ else:
     print("Press any key to terminate...")
     getch()
     quit()
+    
+    
+'''Setup BNO055 I2C communication'''
+i2c = board.I2C()  # uses board.SCL and board.SDA
+sensor = adafruit_bno055.BNO055_I2C(i2c)
+
+#Create new file with correct headers
+with open(FILENAME, mode = 'w', newline='') as file:
+    file.write("time, mag, acc, gyro, euler, linacc, gravity s_pos, s_vel, s_cur\n")
 
 # Set correct mode and enable torque
 dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, POS_MODE)
@@ -161,28 +179,30 @@ while 1:
 
 
     while 1:
-        # Read present position
+        # Read present position, velocity, current
         dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
-        # Read present veolicity
         dxl_present_velocity, dxl_comm_result, dxl_error = packetHandler.read1ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_VEL)
-        # Read present current
         dxl_present_current, dxl_comm_result, dxl_error = packetHandler.read1ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_CURRENT)
-        # Read present input voltage
-        dxl_present_input_voltage, dxl_comm_result, dxl_error = packetHandler.read1ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_INPUT_VOLTAGE)
-        
 
         if dxl_comm_result != COMM_SUCCESS:
             print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:
             print("%s" % packetHandler.getRxPacketError(dxl_error))
-        data = [dxl_present_position, dxl_present_velocity, dxl_present_current]
 
-        u.writeDataArrayToFile(FILENAME, data, withTimestamps = True)
+        #Header defined above: [time, mag, acc, gyro, euler, linacc, gravity s_pos, s_vel, s_cur]
+        t = datetime.datetime.timestamp(datetime.datetime.now())*1000
+        sensorValues = [t,  sensor.magnetic, sensor.acceleration, sensor.gyro, sensor.euler, sensor.linear_acceleration, sensor.gravity, dxl_present_position, dxl_present_velocity, dxl_present_current]
+
+        with open(FILENAME, 'a', newline='') as file:
+            writer = csv.writer(file, delimiter=',')
+            writer.writerow(sensorValues)
+
         print("[ID:%03d] GoalPos:%03d  PresPos:%03d" % (DXL_ID, dxl_goal_position[pos_index], dxl_present_position))
         
         if not abs(dxl_goal_position[pos_index] - dxl_present_position) > DXL_MOVING_STATUS_THRESHOLD:
             break
 
+        time.sleep(1/SAMPLINGRATE) 
 
     # Change goal position/ velocity
     pos_index = pos_index + 1
