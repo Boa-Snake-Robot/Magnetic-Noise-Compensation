@@ -37,6 +37,11 @@ import os
 import utilities as u
 import datetime
 import numpy as np
+import time
+import datetime
+import csv
+import board
+import adafruit_bno055
 
 if os.name == 'nt':
     import msvcrt
@@ -55,6 +60,35 @@ else:
         return ch
 
 from dynamixel_sdk import * # Uses Dynamixel SDK library
+
+def setOperationMode(packetHandler: PacketHandler):
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, VEL_MODE)
+    if dxl_comm_result != COMM_SUCCESS:
+        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("%s" % packetHandler.getRxPacketError(dxl_error))
+    else:
+        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_PROFILE_ACCELERATION, PROFILE_ACC)
+        if dxl_comm_result != COMM_SUCCESS:
+            print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
+            print("%s" % packetHandler.getRxPacketError(dxl_error))
+        else:
+            print('successfully set profile acceleration\n')
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
+        if dxl_comm_result != COMM_SUCCESS:
+            print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
+            print("%s" % packetHandler.getRxPacketError(dxl_error))
+        else:
+            print("Dynamixel has been successfully connected, and mode was set to velocity mode")
+            packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_LED, LED_ON)
+    return
+
+'''-----------------------------------------------------------'''
+SAMPLINGRATE = 100 #Hz
+
+'''Setup servo communication'''
 
 #********* DYNAMIXEL Model definition *********
 MY_DXL = 'X_SERIES'       
@@ -103,20 +137,13 @@ VEL_MODE                    = 1
 PROFILE_ACC                 = 1
 
 vel_index = 0
-dxl_goal_velocity = np.linspace(40 , DXL_VELOCITY_LIMIT - 100, 20, dtype=int)
+dxl_goal_velocity = np.linspace(25 , DXL_VELOCITY_LIMIT - 50, 5, dtype=int)
 
  
 last_mod = 1        #just one
-present_mod = 4096  #180 degrees
+present_mod = 4096  #360 degrees
 
-# Initialize PortHandler instance
-# Set the port path
-# Get methods and members of PortHandlerLinux or PortHandlerWindo ws
 portHandler = PortHandler(DEVICENAME)
-
-# Initialize PacketHandler instance
-# Set the protocol version
-# Get methods and members of Protocol1PacketHandler or Protocol2PacketHandler
 packetHandler = PacketHandler(PROTOCOL_VERSION)
 
 # Open port
@@ -138,28 +165,16 @@ else:
     getch()
     quit()
 
+'''Setup BNO055 I2C communication'''
+i2c = board.I2C()  # uses board.SCL and board.SDA
+sensor = adafruit_bno055.BNO055_I2C(i2c)
+
+#Create new file with correct headers
+with open(FILENAME, mode = 'w', newline='') as file:
+    file.write("time, magX, magY, magZ, accX, accY, accZ, gyrX, gyrY, gyrZ, eulerX, euleY, eulerZ, linX, linY, linZ, gravX, gravY, gravX, servoPos, servoVel, servoCur\n")
+
 # Set correct mode, profile acceleration and enable torque
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, VEL_MODE)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_PROFILE_ACCELERATION, PROFILE_ACC)
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-    else:
-        print('successfully set profile acceleration\n')
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-    else:
-        print("Dynamixel has been successfully connected, and mode was set to velocity mode")
-        packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_LED, LED_ON)
+setOperationMode(packetHandler)
 
 while 1:
     print("Press any key to continue(or press ESC to quit!)")
@@ -180,14 +195,10 @@ while 1:
                 
 
     while 1:
-        # Read present position
+        # Read present position, velocity and current
         dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
-        # Read present veolicity
         dxl_present_velocity, dxl_comm_result, dxl_error = packetHandler.read1ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_VEL)
-        # Read present current
         dxl_present_current, dxl_comm_result, dxl_error = packetHandler.read1ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_CURRENT)
-        # Read present input voltage
-        dxl_present_input_voltage, dxl_comm_result, dxl_error = packetHandler.read1ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_INPUT_VOLTAGE)
         
 
         if dxl_comm_result != COMM_SUCCESS:
@@ -196,10 +207,25 @@ while 1:
             print("%s" % packetHandler.getRxPacketError(dxl_error))
         data = [dxl_present_position, dxl_present_velocity, dxl_present_current]
 
-        u.writeDataArrayToFile(FILENAME, data, withTimestamps = True)
+        #Header defined above: [time, magX, magY, magZ, accX, accY, accZ, gyrX, gyrY, gyrZ, eulerX, euleY, eulerZ, linX, linY, linZ, gravX, gravY, gravX, servoPos, servoVel, servoCur]
+        t = datetime.datetime.timestamp(datetime.datetime.now())
+        sensorValues = [t,  
+                        sensor.magnetic[0],             sensor.magnetic[1],             sensor.magnetic[2],
+                        sensor.acceleration[0],         sensor.acceleration[1],         sensor.acceleration[2],
+                        sensor.gyro[0],                 sensor.gyro[1],                 sensor.gyro[2],
+                        sensor.euler[0],                sensor.euler[1],                sensor.euler[2], 
+                        sensor.linear_acceleration[0],  sensor.linear_acceleration[1],  sensor.linear_acceleration[2],
+                        sensor.gravity[0],              sensor.gravity[1],              sensor.gravity[2], 
+                        dxl_present_position,           dxl_present_velocity,           dxl_present_current]
+
+        with open(FILENAME, 'a', newline='') as file:
+            writer = csv.writer(file, delimiter=',')
+            writer.writerow(sensorValues)
+
+
         print("[ID:%03d] GoalVelocity:%03d  PresVelocity:%03d" % (DXL_ID, dxl_goal_velocity[vel_index], dxl_present_velocity))
 
-        
+        #find out when to change velocity :)
         present_mod = dxl_present_position % 4096
         if (present_mod - last_mod) <= 0:
             #whenever the dynamixel has performed a full rotation
@@ -226,6 +252,7 @@ while 1:
                 print('successfully set speed to ' + str(dxl_goal_velocity[vel_index]))
                 num_rounds = 0
         last_mod = present_mod
+        time.sleep(1/SAMPLINGRATE) 
 
 
    

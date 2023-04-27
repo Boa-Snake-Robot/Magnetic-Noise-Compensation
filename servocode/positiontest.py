@@ -64,7 +64,7 @@ else:
 from dynamixel_sdk import * # Uses Dynamixel SDK library
 
 '''-----------------------------------------------------------'''
-SAMPLINGRATE = 20 #Hz
+SAMPLINGRATE = 100 #Hz
 
 '''Setup servo communication'''
 
@@ -116,13 +116,9 @@ pos_index = 0
 dxl_goal_position = np.linspace(DXL_MINIMUM_POSITION_VALUE, DXL_MAXIMUM_POSITION_VALUE, 6, dtype=int) 
 
 # Initialize PortHandler instance
-# Set the port path
-# Get methods and members of PortHandlerLinux or PortHandlerWindows
 portHandler = PortHandler(DEVICENAME)
 
 # Initialize PacketHandler instance
-# Set the protocol version
-# Get methods and members of Protocol1PacketHandler or Protocol2PacketHandler
 packetHandler = PacketHandler(PROTOCOL_VERSION)
 
 # Open port
@@ -151,7 +147,7 @@ sensor = adafruit_bno055.BNO055_I2C(i2c)
 
 #Create new file with correct headers
 with open(FILENAME, mode = 'w', newline='') as file:
-    file.write("time, mag, acc, gyro, euler, linacc, gravity s_pos, s_vel, s_cur\n")
+    file.write("time, magX, magY, magZ, accX, accY, accZ, gyrX, gyrY, gyrZ, eulerX, euleY, eulerZ, linX, linY, linZ, gravX, gravY, gravX, servoPos, servoVel, servoCur\n")
 
 # Set correct mode and enable torque
 dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, POS_MODE)
@@ -189,12 +185,18 @@ while 1:
         elif dxl_error != 0:
             print("%s" % packetHandler.getRxPacketError(dxl_error))
 
-        #Header defined above: [time, mag, acc, gyro, euler, linacc, gravity s_pos, s_vel, s_cur]
+        #Header defined above: [time, magX, magY, magZ, accX, accY, accZ, gyrX, gyrY, gyrZ, eulerX, euleY, eulerZ, linX, linY, linZ, gravX, gravY, gravX, servoPos, servoVel, servoCur]
         t = datetime.datetime.timestamp(datetime.datetime.now())*1000
-        sensorValues = [t,  sensor.magnetic, sensor.acceleration, sensor.gyro, sensor.euler, sensor.linear_acceleration, sensor.gravity, dxl_present_position, dxl_present_velocity, dxl_present_current]
+        sensorValues = [t,  sensor.magnetic[0], sensor.magnetic[1], sensor.magnetic[2],
+                        sensor.acceleration[0], sensor.acceleration[1], sensor.acceleration[2],
+                        sensor.gyro[0], sensor.gyro[1], sensor.gyro[2],
+                        sensor.euler[0], sensor.euler[1], sensor.euler[2], 
+                        sensor.linear_acceleration[0], sensor.linear_acceleration[1], sensor.linear_acceleration[2],
+                        sensor.gravity[0], sensor.gravity[1], sensor.gravity[2], 
+                        dxl_present_position, dxl_present_velocity, dxl_present_current]
 
         with open(FILENAME, 'a', newline='') as file:
-            writer = csv.writer(file, delimiter=',')
+            writer = csv.writer(file, delimiter=', ')
             writer.writerow(sensorValues)
 
         print("[ID:%03d] GoalPos:%03d  PresPos:%03d" % (DXL_ID, dxl_goal_position[pos_index], dxl_present_position))
