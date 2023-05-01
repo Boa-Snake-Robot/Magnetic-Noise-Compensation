@@ -128,7 +128,7 @@ def samplePureIMU(sensor, filename):
     
     #Create new file with correct headers
     with open(filename, mode = 'w', newline='') as file:
-        file.write("time,magX,magY,magZ,accX,accY,accZ,gyrX,gyrY,gyrZ,eulerX,euleY,eulerZ,linX,linY,linZ,gravX,gravY,gravZ\n")
+        file.write("time,magX,magY,magZ,accX,accY,accZ,gyrX,gyrY,gyrZ,eulerX,eulerY,eulerZ,linX,linY,linZ,gravX,gravY,gravZ\n")
 
     start = datetime.datetime.timestamp(datetime.datetime.now())
     while(datetime.datetime.timestamp(datetime.datetime.now()) - start < 30): #run test for 2 minutes
