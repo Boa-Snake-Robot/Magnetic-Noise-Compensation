@@ -106,7 +106,10 @@ def setupServo(packetHandler: PacketHandler, mode = POS_MODE, profile_acc = 0, p
     return
 
 def readServoData(packetHandler: PacketHandler, portHandler: PortHandler, ID, COMMAND_ADDR):
-    dxl_reply, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, ID, COMMAND_ADDR)
+    if COMMAND_ADDR == ADDR_PRESENT_CURRENT:
+        dxl_reply, dxl_comm_result, dxl_error = packetHandler.read2ByteTxRx(portHandler, ID, COMMAND_ADDR)
+    else:
+        dxl_reply, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, ID, COMMAND_ADDR)
     if dxl_comm_result != COMM_SUCCESS:
         print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
@@ -131,7 +134,7 @@ def samplePureIMU(sensor, filename):
         file.write("time,magX,magY,magZ,accX,accY,accZ,gyrX,gyrY,gyrZ,eulerX,eulerY,eulerZ,linX,linY,linZ,gravX,gravY,gravZ\n")
 
     start = datetime.datetime.timestamp(datetime.datetime.now())
-    while(datetime.datetime.timestamp(datetime.datetime.now()) - start < 30): #run test for 2 minutes
+    while(datetime.datetime.timestamp(datetime.datetime.now()) - start < 120): #run test for 2 minutes
         t = datetime.datetime.timestamp(datetime.datetime.now())
         sensorValues = [t,  
                         sensor.magnetic[0],             sensor.magnetic[1],             sensor.magnetic[2],
