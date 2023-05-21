@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import utilities as u
 import datetime
 import numpy as np
 import time

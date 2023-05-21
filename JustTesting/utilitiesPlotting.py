@@ -118,6 +118,8 @@ def compareIMUMeasurements(df1, df2):
     acc2.plot(ax=axs[1][1])
     gyr1.plot(ax=axs[2][0])
     gyr2.plot(ax=axs[2][1])
+    axs[0][0].set_title("Before")
+    axs[0][1].set_title("After")
     plt.show()
     return
 

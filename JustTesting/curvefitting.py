@@ -53,7 +53,7 @@ def plot_generalised_sine(x, params1):
 
 
 '''Performs sine curve fitting on mag vs pos scatteplot, plots the fitted sine and saves sine params to file'''
-def fitMagnetometerData(df, saveFig = False):
+def fitMagnetometerData(df, saveFig = False, directory = None):
 
     '''PLOT MAG VS POS AND FITTED CURVE'''
     plt.rcParams["figure.figsize"] = [12.50, 6.0]
@@ -76,7 +76,7 @@ def fitMagnetometerData(df, saveFig = False):
         
             
         if saveFig:
-            plt.savefig("figuresAndResults//curvefit" + direction + ".eps")
+            plt.savefig(directory + "//curvefit" + direction + ".eps")
         else:
             plt.show()
         plt.close()

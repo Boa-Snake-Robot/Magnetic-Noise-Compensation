@@ -2,3 +2,7 @@
 *experimentnotes.md
 *.csv
 *.txt
+*.eps
+*.svg
+*figuresAndResults*
+*.png
