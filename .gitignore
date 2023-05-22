@@ -6,3 +6,6 @@
 *.svg
 *figuresAndResults*
 *.png
+Data*
+archive*
+.conda*
