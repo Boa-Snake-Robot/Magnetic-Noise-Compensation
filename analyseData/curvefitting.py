@@ -71,9 +71,10 @@ def plot_magsinefit(df, curvefit_params, savefig = False, directory = None):
     Directions = ['magX', 'magY', 'magZ']
 
     '''PLOT MAG VS POS AND FITTED CURVE'''
-    plt.rcParams["figure.figsize"] = [12.50, 6.0]
+    plt.rcParams["figure.figsize"] = [12.50, 4.0]
     plt.rcParams["figure.autolayout"] = True
     plt.rcParams['font.size'] = 20
+    plt.rcParams['axes.ymargin'] = .4
 
     for direction in Directions:
         plt.scatter(df['servoPos'], df[direction], s = 5, label = 'Data')
@@ -82,11 +83,11 @@ def plot_magsinefit(df, curvefit_params, savefig = False, directory = None):
         plt.ylabel(r'Magnetic field [$\mu T$]')
         plt.plot(df['servoPos'], _generalise_sine(np.array(df['servoPos']), params[0], params[1], params[2], params[3]), label='y =' + f'{params[0]:.2f}' + ' sin(' + f'{params[1]:.2f}' + '(x - ' + f'{params[2]:.2f}' + ')) + ' + f'{params[3]:.2f}')
         
-        plt.legend(loc='lower left')
+        plt.legend()
         plt.title(direction)
         
         if savefig:
-            plt.savefig(directory + "//curvefit" + direction + ".eps")
+            plt.savefig(directory + '//curvefit' + direction + '.svg')
         else:
             plt.show()
         plt.close()

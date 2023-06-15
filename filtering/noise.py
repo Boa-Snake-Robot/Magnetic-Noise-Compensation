@@ -79,10 +79,32 @@ class servoMagNoise():
             Returns:
                 numpy array of magnetic disurbance along the axes [x value, y value, z value]
         """
-
         dist =  np.array([0, 0, 0])
         for i in range(0,3):
             dist[i] = self._func(self.A[i], self.w[i], self.phi[i], self.B[i], shaftPos, deg)
         return dist
-       
-            
+    
+    def get_disturbance_as_timeseries(self, df_servo: pd.DataFrame, deg = True) -> pd.DataFrame:
+        df_mag_disturbance = pd.DataFrame()
+        df_mag_disturbance['time'] = df_servo['time'].copy()
+        df_mag_disturbance['servoPos'] = df_servo['servoPos'].copy()
+        df_mag_disturbance['servoVel'] = df_servo['servoVel'].copy()
+        df_mag_disturbance['servoCur'] = df_servo['servoCur'].copy()
+
+        X, Y, Z = np.array([]), np.array([]), np.array([])
+        for pos in df_servo['servoPos'].copy():
+            dist = self.get_mag_disturbance(pos)
+            X = np.append(X, dist[0])
+            Y = np.append(Y, dist[1])
+            Z = np.append(Z, dist[2])
+        df_mag_disturbance['magX'] = X
+        df_mag_disturbance['magY'] = Y
+        df_mag_disturbance['magZ'] = Z
+        
+        return df_mag_disturbance
+    
+    def print_sine_params(self):
+        for i, element in enumerate(['X - axis', 'Y - axis', 'Z - axis']):
+            print("\nThe servo noise model for the " + element + ":")
+            #A * np.sin(w*(shaftPos - phi)) + B
+            print(" f(x) = %.3f \sin( %.3f (x -%.3f)) + %.3f" % (self.A[i], self.w[i], self.phi[i], self.B[i]))
