@@ -1,4 +1,4 @@
-from filtering import noise
+from filtering import servoMagNoise
 import numpy as np
 from matplotlib import pyplot as plt
 import pandas as pd
@@ -6,7 +6,7 @@ import string
 
 
 #Feed forward filtering
-def filter_servo_noise(disturbance: noise.servoMagNoise, df_noisy_readings: pd.DataFrame):
+def filter_servo_noise(disturbance: servoMagNoise.servoMagNoise, df_noisy_readings: pd.DataFrame):
     temp = {'magX': [], 'magY': [], 'magZ': []}
     for pos in df_noisy_readings['servoPos']:
         temp['magX'] = np.append(temp['magX'], disturbance.get_mag_disturbance(pos)[0])
@@ -57,7 +57,7 @@ def calc_residuals(df_truth: pd.DataFrame, df_estimate: pd.DataFrame, index = 's
 
     return res, std, rmse
 
-def evaluate_model(Model: noise.servoMagNoise, df_samples: pd.DataFrame, df_offset: pd.DataFrame, identifier, plot = True):
+def evaluate_model(Model: servoMagNoise.servoMagNoise, df_samples: pd.DataFrame, df_offset: pd.DataFrame, identifier, plot = True):
     df_est = Model.get_disturbance_as_timeseries(df_samples)
     df_true = df_samples[['time', 'servoPos', 'servoVel', 'servoCur', 'magX', 'magY', 'magZ']].copy()
     df_true['magX'] = df_true['magX']  - df_offset['X']

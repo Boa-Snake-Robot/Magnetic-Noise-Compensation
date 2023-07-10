@@ -4,7 +4,7 @@ from numpy import random
 from analyseData import loadData as ld
 from analyseData import curvefitting as cf
 from analyseData import analysisutilities as au
-from filtering import noise 
+from filtering import servoMagNoise 
 from filtering import filtering as filter
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
@@ -121,40 +121,40 @@ plt.plot()
 
 
 mag_earth0 = {'X': df_IMU0['magX'].mean(), 'Y': df_IMU0['magY'].mean(), 'Z': df_IMU0['magZ'].mean()}
-ServoMagDisturbance0 = noise.servoMagNoise.estimate_from_dataset(mag_earth0, df_servo0)
+ServoMagDisturbance0 = servoMagNoise.servoMagNoise.estimate_from_dataset(mag_earth0, df_servo0)
 print(".0 mm test")
 ServoMagDisturbance0.print_sine_params()
 
 mag_eartha = {'X': df_IMU_distance['magX'].mean(), 'Y': df_IMU_distance['magY'].mean(), 'Z': df_IMU_distance['magZ'].mean()}
-ServoMagDisturbancea = noise.servoMagNoise.estimate_from_dataset(mag_eartha, df_servo_distance)
+ServoMagDisturbancea = servoMagNoise.servoMagNoise.estimate_from_dataset(mag_eartha, df_servo_distance)
 print("10 mm distance test")
 ServoMagDisturbancea.print_sine_params()
 
 mag_eartha2 = {'X': df_IMU_distance2['magX'].mean(), 'Y': df_IMU_distance2['magY'].mean(), 'Z': df_IMU_distance2['magZ'].mean()}
-ServoMagDisturbancea2 = noise.servoMagNoise.estimate_from_dataset(mag_eartha2, df_servo_distance2)
+ServoMagDisturbancea2 = servoMagNoise.servoMagNoise.estimate_from_dataset(mag_eartha2, df_servo_distance2)
 print("20 mm distance test")
 ServoMagDisturbancea2.print_sine_params()
 
 
 mag_earth1 = {'X': df_IMU1['magX'].mean(), 'Y': df_IMU1['magY'].mean(), 'Z': df_IMU1['magZ'].mean()}
-ServoMagDisturbance1 = noise.servoMagNoise.estimate_from_dataset(mag_earth1, df_servo1)
+ServoMagDisturbance1 = servoMagNoise.servoMagNoise.estimate_from_dataset(mag_earth1, df_servo1)
 print(".1 mm test")
 ServoMagDisturbance1.print_sine_params()
 
 
 mag_earth3 = {'X': df_IMU3['magX'].mean(), 'Y': df_IMU3['magY'].mean(), 'Z': df_IMU3['magZ'].mean()}
-ServoMagDisturbance3 = noise.servoMagNoise.estimate_from_dataset(mag_earth3, df_servo3)
+ServoMagDisturbance3 = servoMagNoise.servoMagNoise.estimate_from_dataset(mag_earth3, df_servo3)
 print(".3 mm test")
 ServoMagDisturbance3.print_sine_params()
 
 
 mag_earth3r = {'X': df_IMU3r['magX'].mean(), 'Y': df_IMU3r['magY'].mean(), 'Z': df_IMU3r['magZ'].mean()}
-ServoMagDisturbance3r = noise.servoMagNoise.estimate_from_dataset(mag_earth3r, df_servo3r)
+ServoMagDisturbance3r = servoMagNoise.servoMagNoise.estimate_from_dataset(mag_earth3r, df_servo3r)
 print(".3 mm + around test")
 ServoMagDisturbance3r.print_sine_params()
 
 mag_earth5r = {'X': df_IMU5r['magX'].mean(), 'Y': df_IMU5r['magY'].mean(), 'Z': df_IMU5r['magZ'].mean()}
-ServoMagDisturbance5r = noise.servoMagNoise.estimate_from_dataset(mag_earth5r, df_servo5r)
+ServoMagDisturbance5r = servoMagNoise.servoMagNoise.estimate_from_dataset(mag_earth5r, df_servo5r)
 print(".5 mm + around test")
 ServoMagDisturbance5r.print_sine_params()
 

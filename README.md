@@ -19,13 +19,13 @@ Contains modules to
 ### plotting
 Module with functions to streamline data plots used during analysis.
 
-### simulation
-Still in work.
-Contain modules to simulate the IMU noise and servo motor disturbance.
+### filtering
+Module containing the methods used to filter the magnetometer measurements to improve the heading estimates. EKF.py contains the kalman filter. servoMagNoise.py estimates the magnetic cross-talk.  filtering.py contains the code to correct the magnetometer measurements using the predictor found using servoMagNoise.py
 
 ## Main files
 The main files used during analysis is the following
-- ARMA.ipynb: used to analyse initial magentometer noise
+- ARMA.py: used to analyse initial magentometer noise
 - analyseIMUvsServo.ipynb: used to analyse the effects the EM-field disturbance from the servo motor has on the IMU measurements
 - estimateServoMagneticField.ipynb: used to model the generated EM field from the servo motor by fitting the datapoints to a sine
-- magDisturbanceBrainstorming.py: In work. Used to brainstorm different counteractive methods of the EM disturbance from the servo motor
+- magDisturbanceModelEvaluation.py: Used to evaluate the cross-talk model
+- magDisturvanceShielding.py: Used to evaluate the effect of shielding

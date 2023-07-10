@@ -22,7 +22,7 @@ df_IMU_load = ld.laodTestData("Data/projectThesisTest1/newCurrentMeas/wLoad/pure
 
 mag_earth = {'X': df_IMU['magX'].mean(), 'Y': df_IMU['magY'].mean(), 'Z': df_IMU['magZ'].mean()}
 mag_earth_load = {'X': df_IMU_load['magX'].mean(), 'Y': df_IMU_load['magY'].mean(), 'Z': df_IMU_load['magZ'].mean()}
-ServoMagDisturbance = noise.servoMagNoise.estimate_from_dataset(mag_earth, df_servo)
+ServoMagDisturbance = servoMagNoise.servoMagNoise.estimate_from_dataset(mag_earth, df_servo)
 ServoMagDisturbance.print_sine_params()
 
 # Filter and plot magnetometer measurements
