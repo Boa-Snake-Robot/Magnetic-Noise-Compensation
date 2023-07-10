@@ -8,9 +8,14 @@ from filtering import noise
 from filtering import filtering as filter
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
-plt.rcParams["figure.figsize"] = [16, 8.0]
-plt.rcParams["figure.autolayout"] = True
-plt.rcParams['font.size'] = 14
+#plt.rcParams["figure.figsize"] = [16, 8.0]
+#plt.rcParams["figure.autolayout"] = True
+#plt.rcParams['font.size'] = 14
+
+plt.rcParams["figure.figsize"] = [12, 10]
+plt.rcParams['font.size'] = 20
+plt.rcParams["legend.loc"] = 'upper right'
+plt.rcParams['svg.fonttype'] = 'none'
 
 def calc_earth_residuals(df_est_earth, mag_earth):
     df_res = df_est_earth.copy()
@@ -62,7 +67,7 @@ mag1['magX'].plot(ax=axs[0])
 mag3['magX'].plot(ax=axs[0])
 mag3r['magX'].plot(ax=axs[0])
 mag5r['magX'].plot(ax=axs[0])
-axs[0].set_ylabel(r'x-axis mag field [$\mu$T]')
+axs[0].set_ylabel(r'x-axis [$\mu$T]')
 axs[0].set_xlabel('')
 
 mag0['magY'].plot(ax=axs[1])
@@ -70,7 +75,7 @@ mag1['magY'].plot(ax=axs[1])
 mag3['magY'].plot(ax=axs[1])
 mag3r['magY'].plot(ax=axs[1])
 mag5r['magY'].plot(ax=axs[1])
-axs[1].set_ylabel(r'y-axis mag field [$\mu$T]')
+axs[1].set_ylabel(r'y-axis [$\mu$T]')
 axs[1].set_xlabel('')
 
 mag0['magZ'].plot(ax=axs[2])
@@ -78,36 +83,40 @@ mag1['magZ'].plot(ax=axs[2])
 mag3['magZ'].plot(ax=axs[2])
 mag3r['magZ'].plot(ax=axs[2])
 mag5r['magZ'].plot(ax=axs[2])
-axs[2].set_ylabel(r'z-axis mag field [$\mu$T]')
+axs[2].set_ylabel(r'z-axis [$\mu$T]')
+axs[2].set_xlabel('Time [s]')
+
 
 fig.legend(['without shielding', '0.1 mm shielding', '0.3 mm shielding', ' 0.3 mm + around', '0.5 mm + around'])
-
-plt.savefig("figuresAndResults/shieldingtest/pureIMU.svg", format = 'svg')
-plt.savefig("figuresAndResults/shieldingtest/pureIMU.png", format = 'png')
+plt.suptitle('Initially measured magnetic field')
+#plt.savefig("figuresAndResults/shieldingtest/pureIMU.svg", format = 'svg')
+#plt.savefig("figuresAndResults/shieldingtest/pureIMU.png", format = 'png')
 plt.plot()
 
 fig, axs = plt.subplots(3,1)
 mag0['magX'].plot(ax=axs[0])
 maga['magX'].plot(ax=axs[0])
 maga2['magX'].plot(ax=axs[0])
-axs[0].set_ylabel(r'x-axis mag field [$\mu$T]')
+mag5r['magX'].plot(ax=axs[0])
+axs[0].set_ylabel(r'x-axis [$\mu$T]')
 axs[0].set_xlabel('')
 
 mag0['magY'].plot(ax=axs[1])
 maga['magY'].plot(ax=axs[1])
 maga2['magY'].plot(ax=axs[1])
-axs[1].set_ylabel(r'y-axis mag field [$\mu$T]')
+mag5r['magY'].plot(ax=axs[1])
+axs[1].set_ylabel(r'y-axis [$\mu$T]')
 axs[1].set_xlabel('')
 
 mag0['magZ'].plot(ax=axs[2])
 maga['magZ'].plot(ax=axs[2])
 maga2['magZ'].plot(ax=axs[2])
-axs[2].set_ylabel(r'z-axis mag field [$\mu$T]')
-
-fig.legend(['normal', '10 mm distance', '20 mm distance'])
-
-plt.savefig("figuresAndResults/shieldingtest/pureIMUDIstance.svg", format = 'svg')
-plt.savefig("figuresAndResults/shieldingtest/pureIMUDIstance.png", format = 'png')
+mag5r['magZ'].plot(ax=axs[2])
+axs[2].set_ylabel(r'z-axis [$\mu$T]')
+fig.legend(['normal', '10 mm distance', '20 mm distance',  '0.5 mm + around'])
+plt.suptitle('Initially measured magnetic field')
+#plt.savefig("figuresAndResults/shieldingtest/pureIMUDIstance.svg", format = 'svg')
+#plt.savefig("figuresAndResults/shieldingtest/pureIMUDIstance.png", format = 'png')
 plt.plot()
 
 
@@ -212,13 +221,13 @@ filter.evaluate_model(ServoMagDisturbancea2, df_servo_distance2, mag_eartha2, "2
 
 
 fig, ax = plt.subplots(3,1)
-fig.suptitle("Motor estimate residuals")
+fig.suptitle("Estimation residuals")
 ax[0].scatter(df_res0['time'], df_res0['magX'].tolist(), s = 5)
 #ax[0].scatter(df_res1['time'], df_res1['magX'].tolist(), s = 5)
 ax[0].scatter(df_res3['time'], df_res3['magX'].tolist(), s = 5)
 ax[0].scatter(df_res3r['time'], df_res3r['magX'].tolist(), s = 5)
 ax[0].scatter(df_res5r['time'], df_res5r['magX'].tolist(), s = 5)
-ax[0].set_ylabel(r'Estimation error [$\mu$T]')
+ax[0].set_ylabel(r'x-axis [$\mu$T]')
 
 
 ax[1].scatter(df_res0['time'], df_res0['magY'].tolist(), s = 5)
@@ -226,7 +235,7 @@ ax[1].scatter(df_res0['time'], df_res0['magY'].tolist(), s = 5)
 ax[1].scatter(df_res3['time'], df_res3['magY'].tolist(), s = 5)
 ax[1].scatter(df_res3r['time'], df_res3r['magY'].tolist(), s = 5)
 ax[1].scatter(df_res5r['time'], df_res5r['magY'].tolist(), s = 5)
-ax[1].set_ylabel(r'Estimation error [$\mu$T]')
+ax[1].set_ylabel(r'y-axis [$\mu$T]')
 
 
 ax[2].scatter(df_res0['time'], df_res0['magZ'].tolist(), s = 5)
@@ -234,37 +243,37 @@ ax[2].scatter(df_res0['time'], df_res0['magZ'].tolist(), s = 5)
 ax[2].scatter(df_res3['time'], df_res3['magZ'].tolist(), s = 5)
 ax[2].scatter(df_res3r['time'], df_res3r['magZ'].tolist(), s = 5)
 ax[2].scatter(df_res5r['time'], df_res5r['magZ'].tolist(), s = 5)
-ax[2].set_ylabel(r'Estimation error [$\mu$T]')
+ax[2].set_ylabel(r'z-axis [$\mu$T]')
       
 ax[2].set_xlabel('time [s]')
 fig.legend(['without shielding', '0.3 mm shielding', ' 0.3 mm + around', '0.5 mm + around'])
-plt.savefig("figuresAndResults/shieldingtest/MotorResiduals.svg", format = 'svg')
-plt.savefig("figuresAndResults/shieldingtest/MotorResiduals.png", format = 'png')
+#plt.savefig("figuresAndResults/shieldingtest/MotorResiduals.svg", format = 'svg')
+#plt.savefig("figuresAndResults/shieldingtest/MotorResiduals.png", format = 'png')
 
 
 fig, ax = plt.subplots(3,1)
-fig.suptitle("Motor estimate residuals")
+fig.suptitle("Estimation residuals")
 ax[0].scatter(df_res0['time'], df_res0['magX'].tolist(), s = 5)
 ax[0].scatter(df_resa['time'], df_resa['magX'].tolist(), s = 5)
 ax[0].scatter(df_resa2['time'], df_resa2['magX'].tolist(), s = 5)
-ax[0].set_ylabel(r'Estimation error [$\mu$T]')
+ax[0].set_ylabel(r'x-axis [$\mu$T]')
 
 
 ax[1].scatter(df_res0['time'], df_res0['magY'].tolist(), s = 5)
 ax[1].scatter(df_resa['time'], df_resa['magY'].tolist(), s = 5)
 ax[1].scatter(df_resa2['time'], df_resa2['magY'].tolist(), s = 5)
-ax[1].set_ylabel(r'Estimation error [$\mu$T]')
+ax[1].set_ylabel(r'y-axis [$\mu$T]')
 
 
 ax[2].scatter(df_res0['time'], df_res0['magZ'].tolist(), s = 5)
 ax[2].scatter(df_resa['time'], df_resa['magZ'].tolist(), s = 5)
 ax[2].scatter(df_resa2['time'], df_resa2['magZ'].tolist(), s = 5)
-ax[2].set_ylabel(r'Estimation error [$\mu$T]')
+ax[2].set_ylabel(r'z-axis [$\mu$T]')
       
 ax[2].set_xlabel('time [s]')
 fig.legend(['Normal', '10 mm distance', '20 mm distance'])
-plt.savefig("figuresAndResults/shieldingtest/MotorResidualsdistance.svg", format = 'svg')
-plt.savefig("figuresAndResults/shieldingtest/MotorResidualsdistance.png", format = 'png')
+#plt.savefig("figuresAndResults/shieldingtest/MotorResidualsdistance.svg", format = 'svg')
+#plt.savefig("figuresAndResults/shieldingtest/MotorResidualsdistance.png", format = 'png')
 
 
 
@@ -288,36 +297,39 @@ plt.savefig("figuresAndResults/shieldingtest/MotorResidualsdistance.png", format
 #PLOT ESTIMATED FIELD EXPECT .1 MM SHIELDING SHEET
 
 fig, axs = plt.subplots(3,1)
-B_est_servo0['magX'].plot(ax=axs[0])
-B_est_servo3['magX'].plot(ax=axs[0])
-B_est_servo3r['magX'].plot(ax=axs[0])
-B_est_servo5r['magX'].plot(ax=axs[0])
-B_est_servoa['magX'].plot(ax=axs[0]) 
-B_est_servoa2['magX'].plot(ax=axs[0])
-axs[0].set_ylabel(r'x-axis mag field [$\mu$T]')
+B_est_servo0[['servoPos', 'magX']].set_index('servoPos').plot(ax=axs[0], legend = False)
+#B_est_servo3[['servoPos', 'magX']].set_index('servoPos').plot(ax=axs[0], legend = False)
+#B_est_servo3r[['servoPos', 'magX']].set_index('servoPos').plot(ax=axs[0], legend = False)
+B_est_servo5r[['servoPos', 'magX']].set_index('servoPos').plot(ax=axs[0], legend = False)
+B_est_servoa[['servoPos', 'magX']].set_index('servoPos').plot(ax=axs[0], legend = False) 
+B_est_servoa2[['servoPos', 'magX']].set_index('servoPos').plot(ax=axs[0], legend = False)
+axs[0].set_ylabel(r'x-axis [$\mu$T]')
 axs[0].set_xlabel('')
 
-B_est_servo0['magY'].plot(ax=axs[1])
-B_est_servo3['magY'].plot(ax=axs[1])
-B_est_servo3r['magY'].plot(ax=axs[1])
-B_est_servo5r['magY'].plot(ax=axs[1])
-B_est_servoa['magY'].plot(ax=axs[1]) 
-B_est_servoa2['magY'].plot(ax=axs[1])
-axs[1].set_ylabel(r'y-axis mag field [$\mu$T]')
+B_est_servo0[['servoPos', 'magY']].set_index('servoPos').plot(ax=axs[1], legend = False)
+#B_est_servo3[['servoPos', 'magY']].set_index('servoPos').plot(ax=axs[1], legend = False)
+#B_est_servo3r[['servoPos', 'magY']].set_index('servoPos').plot(ax=axs[1], legend = False)
+B_est_servo5r[['servoPos', 'magY']].set_index('servoPos').plot(ax=axs[1], legend = False)
+B_est_servoa[['servoPos', 'magY']].set_index('servoPos').plot(ax=axs[1], legend = False) 
+B_est_servoa2[['servoPos', 'magY']].set_index('servoPos').plot(ax=axs[1], legend = False)
+axs[1].set_ylabel(r'y-axis [$\mu$T]')
 axs[1].set_xlabel('')
 
-B_est_servo0['magZ'].plot(ax=axs[2])
-B_est_servo3['magZ'].plot(ax=axs[2])
-B_est_servo3r['magZ'].plot(ax=axs[2])
-B_est_servo5r['magZ'].plot(ax=axs[2])
-B_est_servoa['magZ'].plot(ax=axs[2]) 
-B_est_servoa2['magZ'].plot(ax=axs[2])
-axs[2].set_ylabel(r'z-axis mag field [$\mu$T]')
+B_est_servo0[['servoPos', 'magZ']].set_index('servoPos').plot(ax=axs[2], legend = False)
+#B_est_servo3[['servoPos', 'magZ']].set_index('servoPos').plot(ax=axs[2], legend = False)
+#B_est_servo3r[['servoPos', 'magZ']].set_index('servoPos').plot(ax=axs[2], legend = False)
+B_est_servo5r[['servoPos', 'magZ']].set_index('servoPos').plot(ax=axs[2], legend = False)
+B_est_servoa[['servoPos', 'magZ']].set_index('servoPos').plot(ax=axs[2], legend = False) 
+B_est_servoa2[['servoPos', 'magZ']].set_index('servoPos').plot(ax=axs[2], legend = False)
+axs[2].set_ylabel(r'z-axis [$\mu$T]')
+axs[2].set_xlabel(r'Servo shaft position [$\degree$]')
 
-fig.legend(['without shielding', '0.3 mm shielding', ' 0.3 mm + around', '0.5 mm + around', '10 mm distance', '20 mm distance'])
-fig.suptitle("Estimated servo field with shielding and distance")
-plt.savefig("figuresAndResults/shieldingtest/estimatedServoField.svg", format = 'svg')
-plt.savefig("figuresAndResults/shieldingtest/estimatedServoField.png", format = 'png')
+#fig.legend(['without shielding', '0.3 mm shielding', ' 0.3 mm + around', '0.5 mm + around', '10 mm distance', '20 mm distance'])
+fig.legend(['without shielding', '0.5 mm + around', '10 mm distance', '20 mm distance'])
 
+fig.suptitle("Estimated magnetic disturbance with shielding techniques")
+#plt.savefig("figuresAndResults/shieldingtest/estimatedServoField.svg", format = 'svg')
+#plt.savefig("figuresAndResults/shieldingtest/estimatedServoField.png", format = 'png')
+#
 
 plt.show()

@@ -10,12 +10,12 @@ def _func(x, A, w, phi, B, deg = True):
         x = x*np.pi/180
     return A * np.sin(w*x - phi) + B
 
-def fit_sine(x_data, y_data):
+def fit_sine(x_data, y_data, init_guess = None):
     """Fits a dataset to a sine
         Returns:
            params: [A, w, phi, B] of y = A*sin(w*x - phi) + B
     """
-    params, param_cov = optimize.curve_fit(_func, x_data, y_data)
+    params, param_cov = optimize.curve_fit(_func, x_data, y_data, p0=init_guess)
     return params, param_cov
 
 def _generalise_sine(x, A, w, phi, B, deg = True):
@@ -37,7 +37,7 @@ def _get_generalise_sine_params(A, B, C, D):
     params = [A, B, phi, D]
     return params
 
-def fit_magnetometer_data(df):
+def fit_magnetometer_data(df, init_guess = None):
     """Performs sine curve fitting on mag vs pos scatteplot, plots the fitted sine and saves sine params to file
 
         Args:
@@ -50,7 +50,7 @@ def fit_magnetometer_data(df):
     Directions = ['magX', 'magY', 'magZ']
     df_params = pd.DataFrame(columns=Directions)
     for direction in Directions:
-        params, param_cov = fit_sine(df['servoPos'].to_numpy(), np.array(df[direction].to_numpy()))
+        params, param_cov = fit_sine(df['servoPos'].to_numpy(), np.array(df[direction].to_numpy()), init_guess = init_guess)
         gen_params = _get_generalise_sine_params(params[0], params[1], params[2], params[3])
         df_params[direction] = gen_params
     return df_params
@@ -77,11 +77,11 @@ def plot_magsinefit(df, curvefit_params, savefig = False, directory = None):
     plt.rcParams['axes.ymargin'] = .4
 
     for direction in Directions:
-        plt.scatter(df['servoPos'], df[direction], s = 5, label = 'Data')
+        plt.scatter(df['servoPos'], df[direction], s = 5, label = 'Data', color = 'b')
         params = curvefit_params[direction].to_numpy()
         plt.xlabel('Servo position [deg]')
         plt.ylabel(r'Magnetic field [$\mu T$]')
-        plt.plot(df['servoPos'], _generalise_sine(np.array(df['servoPos']), params[0], params[1], params[2], params[3]), label='y =' + f'{params[0]:.2f}' + ' sin(' + f'{params[1]:.2f}' + '(x - ' + f'{params[2]:.2f}' + ')) + ' + f'{params[3]:.2f}')
+        plt.plot(df['servoPos'], _generalise_sine(np.array(df['servoPos']), params[0], params[1], params[2], params[3]), label='y =' + f'{params[0]:.2f}' + ' sin(' + f'{params[1]:.2f}' + '(x - ' + f'{params[2]:.2f}' + ')) + ' + f'{params[3]:.2f}', color = 'r')
         
         plt.legend()
         plt.title(direction)

@@ -12,6 +12,7 @@ def compare_IMU_measurements(df1: pd.DataFrame, df2: pd.DataFrame):
         
         return: nothing
     """
+    plt.rcParams['font.size'] = 20
     mag1 = pd.pivot_table(df1, index = ['time'], values= ['magX', 'magY', 'magZ'])
     gyr1 = pd.pivot_table(df1, index = ['time'], values= ['gyrX', 'gyrY', 'gyrZ'])
     acc1 = pd.pivot_table(df1, index = ['time'], values= ['accX', 'accY', 'accZ'])
@@ -20,15 +21,19 @@ def compare_IMU_measurements(df1: pd.DataFrame, df2: pd.DataFrame):
     gyr2 = pd.pivot_table(df2, index = ['time'], values= ['gyrX', 'gyrY', 'gyrZ'])
     acc2 = pd.pivot_table(df2, index = ['time'], values= ['accX', 'accY', 'accZ'])
 
-    fig, axs = plt.subplots(3,2, figsize=(16,9))
-    mag1.plot(ax=axs[0][0])
-    mag2.plot(ax=axs[0][1])
-    acc1.plot(ax=axs[1][0])
-    acc2.plot(ax=axs[1][1])
-    gyr1.plot(ax=axs[2][0])
-    gyr2.plot(ax=axs[2][1])
-    axs[0][0].set_title("Before")
-    axs[0][1].set_title("After")
+    fig, axs = plt.subplots(1,2, figsize=(12,4))
+    mag1.plot(ax=axs[0], legend=False)
+    mag2.plot(ax=axs[1], legend= False)
+    axs[0].set_title("Before")
+    axs[1].set_title("After")
+    axs[0].set_xlabel("Time [s]")
+    axs[1].set_xlabel("Time [s]")
+    axs[0].set_ylabel(r'$\mu T$')
+    fig.legend([r'$x$-axis', r'$y$-axis', r'$z$-axis'])
+    plt.savefig('figuresAndResults/comparison.svg', format='svg')
+
+
+
     plt.show()
     return
 
@@ -42,19 +47,20 @@ def plot_servo(df: pd.DataFrame, directory):
             Nothing
 
     """
-
+    #sns.set(font_scale=1.8)
     sns.pairplot(df[['magX', 'magY', 'magZ', 'servoVel', 'servoPos', 'servoCur']], corner = True)
-    plt.savefig(directory + '/magServoPairPlot.eps', format='eps')
+    plt.savefig(directory + '/magServoPairPlot.svg', format='svg')
     sns.pairplot(df[['accX', 'accY', 'accZ', 'servoVel', 'servoPos', 'servoCur']], corner = True)
-    plt.savefig(directory + '/accServoPairPlot.eps', format='eps')
-    sns.pairplot(df[['gyrX', 'gyrY', 'gyrZ', 'servoVel', 'servoPos', 'servoCur']], corner = True)
-    plt.savefig(directory + '/gyrServoPairPlot.eps', format='eps')
+    plt.savefig(directory + '/accServoPairPlot.svg', format='svg')
+    i = sns.pairplot(df[['gyrX', 'gyrY', 'gyrZ', 'servoVel', 'servoPos', 'servoCur']], corner = True)
+    axs = i.axes
+    axs[5,0].ticklabel_format(style='sci', scilimits=(0,0), axis='x')
+    axs[5,1].ticklabel_format(style='sci', scilimits=(0,0), axis='x')
+    axs[5,2].ticklabel_format(style='sci', scilimits=(0,0), axis='x')
 
-    sns.pairplot(df[['linX', 'linY', 'linZ', 'servoVel', 'servoPos', 'servoCur']], corner = True)
-    plt.savefig(directory + '/linServoPairPlot.eps', format='eps')
-    sns.pairplot(df[['gravX', 'gravY', 'gravZ', 'servoVel', 'servoPos', 'servoCur']], corner = True)
-    sns.pairplot(df[['eulerX', 'euleY', 'eulerZ', 'servoVel', 'servoPos', 'servoCur']], corner = True)
+    plt.savefig(directory + '/gyrServoPairPlot.svg', format='svg')
 
+    plt.show()
     return
 
 def plot_IMU(df1):
@@ -78,3 +84,4 @@ def plot_IMU(df1):
     sns.histplot(data=df1['accX'], ax=ax[0][2]).set(xlabel = 'accX')
     sns.histplot(data=df1['accY'], ax=ax[1][2]).set(xlabel = 'accY')
     sns.histplot(data=df1['accZ'], ax=ax[2][2]).set(xlabel = 'accZ')
+    plt.show()

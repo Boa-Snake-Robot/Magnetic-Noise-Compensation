@@ -4,28 +4,6 @@ from numpy import random
 from analyseData import curvefitting as cf
 import pandas as pd
 
-
-class IMUnoise():
-    acc_std: ndarray
-    gyro_std: ndarray
-    mag_std: ndarray
-
-    def __init__(self, acc_std: ndarray, gyro_std: ndarray, mag_std: ndarray):
-
-        self.acc_std = acc_std
-        self.gyro_std = gyro_std
-        self.mag_std = gyro_std
-    
-    def get_mag_noise(self) -> ndarray:
-        return np.array[random.normal(0, self.mag_std[0]), random.normal(0, self.mag_std[1]), random.normal(0, self.mag_std[2])]
-    
-    def get_acc_noise(self) -> ndarray:
-        return np.array[random.normal(0, self.acc_std[0]), random.normal(0, self.acc_std[1]), random.normal(0, self.acc_std[2])]
-    
-    def get_gyr_noise(self) -> ndarray:
-        return np.array[random.normal(0, self.gyro_std[0]), random.normal(0, self.gyro_std[1]), random.normal(0, self.gyro_std[2])]
-
-
 class servoMagNoise():
     A:  ndarray
     w:  ndarray

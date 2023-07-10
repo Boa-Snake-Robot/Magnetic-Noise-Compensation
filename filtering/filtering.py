@@ -3,6 +3,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 import pandas as pd
 import string
+
+
 #Feed forward filtering
 def filter_servo_noise(disturbance: noise.servoMagNoise, df_noisy_readings: pd.DataFrame):
     temp = {'magX': [], 'magY': [], 'magZ': []}
@@ -26,14 +28,6 @@ def filter_servo_noise(disturbance: noise.servoMagNoise, df_noisy_readings: pd.D
     df_est_earth['magY'] = est_earth_Y
     df_est_earth['magZ'] = est_earth_Z
 
-    #indexes_to_drop = []
-
-    #for index, row in df_est_earth.iterrows():
-        #mag_magnitude = np.linalg.norm([df_est_earth['magX'].iloc[index], df_est_earth['magY'].iloc[index], #df_est_earth['magZ'].iloc[index]])
-        #if ((mag_magnitude > 65) or (mag_magnitude < 25)):
-        #    indexes_to_drop = np.append(indexes_to_drop, index)
-        #    print(indexes_to_drop)
-    #df_est_earth.drop(indexes_to_drop, axis=0, inplace=True)
     return df_est_earth
 
 # Help functions 
@@ -77,7 +71,7 @@ def evaluate_model(Model: noise.servoMagNoise, df_samples: pd.DataFrame, df_offs
     print("rmse:")
     print(df_rmse[['magX', 'magY', 'magZ']])
     if plot:
-        plot_residuals(df_res, "Estimation error of servo motor magnetic field " + identifier)
+        plot_residuals(df_res, "Estimation error " + identifier)
 
 def plot_error_and_estimates(df_estimate, df_error, df_IMU, title):
     plt.rcParams["figure.figsize"] = [12.50, 6.0]
@@ -111,37 +105,39 @@ def plot_error_and_estimates(df_estimate, df_error, df_IMU, title):
         ax[1][1].set_xlabel(element)
 
 def plot_residuals(df_error, title):
-    fig, ax = plt.subplots(2,2)
+    fig, ax = plt.subplots(1,2)
     fig.suptitle(title)
-    ax[0][0].scatter(df_error['time'], df_error['magX'].tolist(), s = 5)
-    ax[0][0].scatter(df_error['time'], df_error['magY'].tolist(), s = 5)
-    ax[0][0].scatter(df_error['time'], df_error['magZ'].tolist(), s = 5)
-    ax[0][0].legend(['error X', 'error Y', 'error Z'])
-    ax[0][0].set_xlabel('time [s]')
-    ax[0][0].set_ylabel(r'Estimation error [$\mu$T]')
+    ax[0].scatter(df_error['time'], df_error['magX'].tolist(), s = 5)
+    ax[0].scatter(df_error['time'], df_error['magY'].tolist(), s = 5)
+    ax[0].scatter(df_error['time'], df_error['magZ'].tolist(), s = 5)
+    #ax[0].legend(['error X', 'error Y', 'error Z'])
+    ax[0].set_xlabel('time [s]')
+    ax[0].set_ylabel(r'$\mu$T')
 
-    ax[0][1].scatter(df_error['servoPos'], df_error['magX'].tolist(), s = 5)
-    ax[0][1].scatter(df_error['servoPos'], df_error['magY'].tolist(), s = 5)
-    ax[0][1].scatter(df_error['servoPos'], df_error['magZ'].tolist(), s = 5)
-    ax[0][1].legend(['error X', 'error Y', 'error Z'])
-    ax[0][1].set_xlabel('Servo position [degrees]')
-    ax[0][1].set_ylabel(r'Estimation error [$\mu$T]')
+    #ax[0][1].scatter(df_error['servoPos'], df_error['magX'].tolist(), s = 5)
+    #ax[0][1].scatter(df_error['servoPos'], df_error['magY'].tolist(), s = 5)
+    #ax[0][1].scatter(df_error['servoPos'], df_error['magZ'].tolist(), s = 5)
+    #ax[0][1].legend(['error X', 'error Y', 'error Z'])
+    #ax[0][1].set_xlabel('Servo position [degrees]')
+    #ax[0][1].set_ylabel(r'Estimation error [$\mu$T]')
 
-    ax[1][0].scatter(df_error['servoVel'], df_error['magX'].tolist(), s = 5)
-    ax[1][0].scatter(df_error['servoVel'], df_error['magY'].tolist(), s = 5)
-    ax[1][0].scatter(df_error['servoVel'], df_error['magZ'].tolist(), s = 5)
-    ax[1][0].legend(['error X', 'error Y', 'error Z'])
-    ax[1][0].set_xlabel('Servo Velocity [rpm]')
-    ax[1][0].set_ylabel(r'Estimation error [$\mu$T]')
+    ax[1].scatter(df_error['servoVel'], df_error['magX'].tolist(), s = 5)
+    ax[1].scatter(df_error['servoVel'], df_error['magY'].tolist(), s = 5)
+    ax[1].scatter(df_error['servoVel'], df_error['magZ'].tolist(), s = 5)
+    #ax[1].legend(['error X', 'error Y', 'error Z'])
+    ax[1].set_xlabel('Servo shaft velocity [rpm]')
+    #ax[1].set_ylabel(r'$\mu$T')
+    fig.legend(['error X', 'error Y', 'error Z'])
 
-    ax[1][1].scatter(df_error['servoCur'], df_error['magX'].tolist(), s = 5)
-    ax[1][1].scatter(df_error['servoCur'], df_error['magY'].tolist(), s = 5)
-    ax[1][1].scatter(df_error['servoCur'], df_error['magZ'].tolist(), s = 5)
-    ax[1][1].legend(['error X', 'error Y', 'error Z'])
-    ax[1][1].set_xlabel('servo current [mA]')
-    ax[1][1].set_ylabel(r'Estimation error [$\mu$T]')
-    #plt.savefig("figuresAndResults/filterservofield/" + title.replace(" ", "") + ".svg", format='svg')
-    #plt.savefig("figuresAndResults/filterservofield/" + title.replace(" ", "") + ".png", format='png')
+
+    #ax[1][1].scatter(df_error['servoCur'], df_error['magX'].tolist(), s = 5)
+    #ax[1][1].scatter(df_error['servoCur'], df_error['magY'].tolist(), s = 5)
+    #ax[1][1].scatter(df_error['servoCur'], df_error['magZ'].tolist(), s = 5)
+    #ax[1][1].legend(['error X', 'error Y', 'error Z'])
+    #ax[1][1].set_xlabel('servo current [mA]')
+    #ax[1][1].set_ylabel(r'Estimation error [$\mu$T]')
+    plt.savefig("figuresAndResults/filterservofield/" + title.replace(" ", "") + ".svg", format='svg')
+    plt.savefig("figuresAndResults/filterservofield/" + title.replace(" ", "") + ".png", format='png')
 
 
 
