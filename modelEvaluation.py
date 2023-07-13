@@ -12,9 +12,6 @@ plt.rcParams["figure.autolayout"] = True
 plt.rcParams['font.size'] = 14
 plt.rcParams['svg.fonttype'] = 'none'
 
-
-
-
 df_servo = ld.laodTestData("exampleData/servoDataStille.csv").dropna()
 df_IMU = ld.laodTestData("exampleData/pureIMUDataStille.csv").dropna()
 
