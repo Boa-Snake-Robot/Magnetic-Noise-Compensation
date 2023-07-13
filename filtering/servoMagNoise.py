@@ -86,3 +86,12 @@ class servoMagNoise():
             print("\nThe servo noise model for the " + element + ":")
             #A * np.sin(w*(shaftPos - phi)) + B
             print(" f(x) = %.3f \sin( %.3f (x -%.3f)) + %.3f" % (self.A[i], self.w[i], self.phi[i], self.B[i]))
+
+    def get_params(self):
+        df = pd.DataFrame()
+        df['magX'] = [self.A[0], self.w[0], self.phi[0], self.B[0]]
+        df['magY'] = [self.A[1], self.w[1], self.phi[1], self.B[1]]
+        df['magZ'] = [self.A[2], self.w[2], self.phi[2], self.B[2]]
+
+        return df
+    
