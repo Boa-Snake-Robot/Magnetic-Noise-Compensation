@@ -1,4 +1,4 @@
-# Magnetic-Noise-Compensation-Master
+# Magnetic-Noise-Compensation
 Repository dedicated to Mari Linnerud's Masters thesis work. 
 
 This repository contains example code for the proposed improved heading estimation technique in the Master's thesis
