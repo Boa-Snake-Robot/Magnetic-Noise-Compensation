@@ -1,4 +1,4 @@
-from filtering.EKF import KalmanFilter2D
+from filtering.KF import KalmanFilter2D
 from filtering import servoMagNoise
 from filtering import filtering as filter
 from analyseData import loadData as ld
@@ -41,7 +41,7 @@ phi = [32.92, 6.16, 14.47]
 B = [75.73, -8.53, 13.27]
 servoNoise = servoMagNoise.servoMagNoise(A, w, phi, B)
 
-df_est_mag = filter.filter_servo_noise(servoNoise, df_servo)
+df_est_mag = filter.feedforward_servo_noise(servoNoise, df_servo)
 gyroscope = - df_servo['gyrZ'].to_numpy() # heading rate has opposite positive direction than gyroscope measurements
 #df_est_mag = df_imu.copy()
 #gyroscope = - df_imu['gyrZ'].to_numpy() # heading rate has opposite positive direction than gyroscope measurements

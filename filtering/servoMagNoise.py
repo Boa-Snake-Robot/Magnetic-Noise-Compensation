@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import ndarray
 from numpy import random
-from analyseData import curvefitting as cf
+from filtering import curvefitting as cf
 import pandas as pd
 
 class servoMagNoise():
@@ -22,7 +22,7 @@ class servoMagNoise():
             Args:
                 mag_earth: [muT] dictionary with entries ['X', 'Y', 'Z] of floats or integers
 
-                df_servo: dataframe with servo motor measurements with columns ['magX', 'magY', 'magZ']
+                df_servo: dataframe with servo motor measurements with columns ['magX', 'magY', 'magZ', 'servoPos]
             
             Returns:
                 Nothing

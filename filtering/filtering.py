@@ -2,11 +2,18 @@ from filtering import servoMagNoise
 import numpy as np
 from matplotlib import pyplot as plt
 import pandas as pd
-import string
 
 
-#Feed forward filtering
-def filter_servo_noise(disturbance: servoMagNoise.servoMagNoise, df_noisy_readings: pd.DataFrame):
+def feedforward_servo_noise(disturbance: servoMagNoise.servoMagNoise, df_noisy_readings: pd.DataFrame):
+    """Corrects the magnetic field measurements using feed forward
+            Args:
+                disturbance: servoMagNoise.servoMagNoises class containing the model of the magnetic cross-talk
+
+                df_noisy_readings: dataframe with noisy measurements. Assumes the collumns ['time', 'magX', 'magY', 'magZ', 'servoPos', 'servoVel', 'servoCur']
+            
+            Returns:
+                Dataframe with corrected measurements
+        """
     temp = {'magX': [], 'magY': [], 'magZ': []}
     for pos in df_noisy_readings['servoPos']:
         temp['magX'] = np.append(temp['magX'], disturbance.get_mag_disturbance(pos)[0])
@@ -14,23 +21,24 @@ def filter_servo_noise(disturbance: servoMagNoise.servoMagNoise, df_noisy_readin
         temp['magZ'] = np.append(temp['magZ'], disturbance.get_mag_disturbance(pos)[2])
         
 
-    est_earth_X = (df_noisy_readings['magX'].copy() - temp['magX'].copy())
-    est_earth_Y = (df_noisy_readings['magY'].copy() - temp['magY'].copy())
-    est_earth_Z = (df_noisy_readings['magZ'].copy() - temp['magZ'].copy())
+    est_corrected_X = (df_noisy_readings['magX'].copy() - temp['magX'].copy())
+    est_corrected_Y = (df_noisy_readings['magY'].copy() - temp['magY'].copy())
+    est_corrected_Z = (df_noisy_readings['magZ'].copy() - temp['magZ'].copy())
 
 
-    df_est_earth = pd.DataFrame()
-    df_est_earth['time'] = df_noisy_readings['time'].tolist()
-    df_est_earth['servoPos'] = df_noisy_readings['servoPos'].copy()
-    df_est_earth['servoVel'] = df_noisy_readings['servoVel'].copy()
-    df_est_earth['servoCur'] = df_noisy_readings['servoCur'].copy()
-    df_est_earth['magX'] = est_earth_X
-    df_est_earth['magY'] = est_earth_Y
-    df_est_earth['magZ'] = est_earth_Z
+    df_est_corrected = pd.DataFrame()
+    df_est_corrected['time'] = df_noisy_readings['time'].tolist()
+    df_est_corrected['servoPos'] = df_noisy_readings['servoPos'].copy()
+    df_est_corrected['servoVel'] = df_noisy_readings['servoVel'].copy()
+    df_est_corrected['servoCur'] = df_noisy_readings['servoCur'].copy()
+    df_est_corrected['magX'] = est_corrected_X
+    df_est_corrected['magY'] = est_corrected_Y
+    df_est_corrected['magZ'] = est_corrected_Z
 
-    return df_est_earth
+    return df_est_corrected
 
-# Help functions 
+# Help functions (Directly relevant to this work)
+
 def calc_residuals(df_truth: pd.DataFrame, df_estimate: pd.DataFrame, index = 'servoPos', columns = ['magX', 'magY', 'magZ']) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """ Calculates the residuals and performance indeces of the estimated model
         Args:
@@ -59,6 +67,7 @@ def calc_residuals(df_truth: pd.DataFrame, df_estimate: pd.DataFrame, index = 's
 
 def evaluate_model(Model: servoMagNoise.servoMagNoise, df_samples: pd.DataFrame, df_offset: pd.DataFrame, identifier, plot = True):
     df_est = Model.get_disturbance_as_timeseries(df_samples)
+    # Calculate measured magnetic field from the motor from the samples
     df_true = df_samples[['time', 'servoPos', 'servoVel', 'servoCur', 'magX', 'magY', 'magZ']].copy()
     df_true['magX'] = df_true['magX']  - df_offset['X']
     df_true['magY'] = df_true['magY']  - df_offset['Y']
@@ -138,8 +147,6 @@ def plot_residuals(df_error, title):
     #ax[1][1].set_ylabel(r'Estimation error [$\mu$T]')
     plt.savefig("figuresAndResults/filterservofield/" + title.replace(" ", "") + ".svg", format='svg')
     plt.savefig("figuresAndResults/filterservofield/" + title.replace(" ", "") + ".png", format='png')
-
-
 
 def plot_servo_motor_field(B_servo, B_est_servo, title, savefig = False, directory = None):
     for element in ['time', 'servoPos', 'servoVel', 'servoCur']:

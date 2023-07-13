@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from numpy import random
 from analyseData import loadData as ld
-from analyseData import curvefitting as cf
+from filtering import curvefitting as cf
 from analyseData import analysisutilities as au
 from filtering import servoMagNoise 
 from filtering import filtering as filter
@@ -286,11 +286,11 @@ fig.legend(['Normal', '10 mm distance', '20 mm distance'])
 
 # plot earth residuals when IMU0 is defined as correct
 #estimate earth's magnetic filed
-#df_est_earth0 = filter.filter_servo_noise(ServoMagDisturbance0, df_servo0)
-#df_est_earth1 = filter.filter_servo_noise(ServoMagDisturbance1, df_servo1)
-#df_est_earth3 = filter.filter_servo_noise(ServoMagDisturbance3, df_servo3)
-#df_est_earth3r = filter.filter_servo_noise(ServoMagDisturbance3r, df_servo3r)
-#df_est_earth5r = filter.filter_servo_noise(ServoMagDisturbance5r, df_servo5r)
+#df_est_earth0 = filter.feedforward_servo_noise(ServoMagDisturbance0, df_servo0)
+#df_est_earth1 = filter.feedforward_servo_noise(ServoMagDisturbance1, df_servo1)
+#df_est_earth3 = filter.feedforward_servo_noise(ServoMagDisturbance3, df_servo3)
+#df_est_earth3r = filter.feedforward_servo_noise(ServoMagDisturbance3r, df_servo3r)
+#df_est_earth5r = filter.feedforward_servo_noise(ServoMagDisturbance5r, df_servo5r)
 #filter.plot_residuals(df_earth_residuals, "Estimation error of earth's magnetic field")
 
 

@@ -6,7 +6,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 import matplotlib.pyplot as plt
 
 
-def plot_xyz_timeseries(data):
+def plot_xyz_timeseries(data, filename):
     ax = data[['time', 'magX', 'magY', 'magZ']].set_index('time').plot(subplots=True)
     ax[0].set_xlabel('')
     ax[1].set_xlabel('')
@@ -15,6 +15,7 @@ def plot_xyz_timeseries(data):
     ax[1].set_ylabel(r'$\mu$ T')
     ax[2].set_ylabel(r'$\mu$ T')
     plt.legend()
+    plt.savefig(filename, type='svg')
     plt.show()
     #data[['time', 'gyrX', 'gyrY', 'gyrZ']].set_index('time').plot(subplots=True)
     #data[['time', 'accX', 'accY', 'accZ']].set_index('time').plot(subplots=True)
@@ -56,19 +57,20 @@ def drop_outliers_IQR(df: pd.DataFrame, sensititvity = 1.5) -> pd.DataFrame:
 
    return not_outliers
 
-plt.rcParams["figure.figsize"] = [10.50, 6.0]
+plt.rcParams["figure.figsize"] = [8, 5.0]
 plt.rcParams["figure.autolayout"] = True
 plt.rcParams['font.size'] = 20
 plt.rcParams['axes.ymargin'] = .4
+plt.rcParams['svg.fonttype'] = 'none'
 # Read in the CSV file containing magnetometer data
 data = pd.read_csv("Data/ARMA/IMUTESTdata2023-06-05 09%3A00%3A57.294645.csv", sep = ',', header=0, index_col=False)
 saveStatistics("IMUNoiseCharStatistics.csv", data)
 data['time'] = (data['time'] - data['time'].iloc[0])
-plot_xyz_timeseries(data)
+plot_xyz_timeseries(data, 'figuresAndResults/magNoiseWOutliers.svg')
 
 #remove obvious outliers due to measurement noise
 data_dropped_outliers = drop_outliers_IQR(data, sensititvity=3)
-plot_xyz_timeseries(data_dropped_outliers)
+plot_xyz_timeseries(data_dropped_outliers, 'figuresAndResults/magNoiseWoOutliers.svg')
 saveStatistics("IMUNoiseCharStatistics.csv", data_dropped_outliers)
 
 

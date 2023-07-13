@@ -2,15 +2,15 @@ import pandas as pd
 import numpy as np
 from numpy import random
 from analyseData import loadData as ld
-from analyseData import curvefitting as cf
 from analyseData import analysisutilities as au
-from filtering import noise 
+from filtering import servoMagNoise 
 from filtering import filtering as filter
 import matplotlib.pyplot as plt
 
 plt.rcParams["figure.figsize"] = [16, 8.0]
 plt.rcParams["figure.autolayout"] = True
 plt.rcParams['font.size'] = 14
+plt.rcParams['svg.fonttype'] = 'none'
 
 
 
@@ -26,7 +26,7 @@ ServoMagDisturbance = servoMagNoise.servoMagNoise.estimate_from_dataset(mag_eart
 ServoMagDisturbance.print_sine_params()
 
 # Filter and plot magnetometer measurements
-df_est_earth = filter.filter_servo_noise(ServoMagDisturbance, df_servo)
+df_est_earth = filter.feedforward_servo_noise(ServoMagDisturbance, df_servo)
 df_earth_residuals = df_est_earth.copy()
 df_earth_residuals['magX'] = df_earth_residuals['magX'] - mag_earth['X']
 df_earth_residuals['magY'] = df_earth_residuals['magY'] - mag_earth['Y']
@@ -45,18 +45,33 @@ filter.evaluate_model(ServoMagDisturbance, df_servo, mag_earth, "on training dat
 filter.evaluate_model(ServoMagDisturbance, df_servo_load, mag_earth_load, "on validation data")
 plt.show()
     
+plt.rcParams["figure.figsize"] = [10, 6.0]
+plt.rcParams["figure.autolayout"] = True
+plt.rcParams['font.size'] = 18
+plt.rcParams['svg.fonttype'] = 'none'
 
+df_est = ServoMagDisturbance.get_disturbance_as_timeseries(df_servo)
+df_true = df_servo[['time', 'servoPos', 'servoVel', 'servoCur', 'magX', 'magY', 'magZ']].copy()
+df_true['magX'] = df_true['magX']  - mag_earth['X']
+df_true['magY'] = df_true['magY']  - mag_earth['Y']
+df_true['magZ'] = df_true['magZ']  - mag_earth['Z']
 
+df_error, df_std, df_rmse = filter.calc_residuals(df_true, df_est)
 
+fig, ax = plt.subplots(2,2)
+ax[0][0].plot(df_error['time'], df_error['magX'].tolist(), color = "b")
+ax[0][1].plot(df_error['time'], df_error['magY'].tolist(), color = "g")
+ax[1][0].plot(df_servo['time'], df_servo['magX'].tolist(), color = "r")
+ax[1][1].plot(df_servo['time'], df_servo['magY'].tolist(), color = "m")
 
-#B_est_servo = B_est_servo.sort_values('servoCur')    
-#B_est_servo[['servoVel', 'servoCur']].set_index('servoCur').plot()
-#norm = np.array([])
-#for index, row in B_est_servo.iterrows():
-#    norm = np.append(norm, np.linalg.norm(row[['magX', 'magY', 'magZ']]))
-#B_servo = B_servo.sort_values('time')
-#B_servo[['magX', 'magY', 'magZ', 'servoCur']].set_index('servoCur').plot(subplots=True)
-#plt.figure()
-#plt.scatter(B_servo['servoCur'], norm)
-#plt.show()
+ax[1][0].set_xlabel('time [s]')
+ax[1][1].set_xlabel('time [s]')
+ax[0][0].set_ylabel(r'$\mu$T')
+ax[1][0].set_ylabel(r'$\mu$T')
+#ax[2].set_ylabel(r'$\mu$T')
 
+fig.legend([r'$x$-axis model residual', r'$y$-axis model residual', r'$x$-axis magnetic cross-talk',r'$y$-axis magnetic cross-talk'])
+
+plt.savefig("figuresAndResults/filterservofield/eddy.svg", format='svg')
+
+plt.show()
